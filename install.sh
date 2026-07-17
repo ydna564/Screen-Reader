@@ -20,7 +20,19 @@ fi
 
 # --- app bundle ---
 echo "Building $APP …"
-mkdir -p "$APP/Contents/MacOS"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+
+# app icon (regenerate the .icns from assets/logo.png if the tools exist)
+if [ -f assets/logo.png ] && command -v iconutil >/dev/null; then
+  ICONSET="$(mktemp -d)/AppIcon.iconset"; mkdir -p "$ICONSET"
+  for s in 16 32 128 256 512; do
+    sips -z $s $s assets/logo.png --out "$ICONSET/icon_${s}x${s}.png" >/dev/null
+    sips -z $((s*2)) $((s*2)) assets/logo.png \
+         --out "$ICONSET/icon_${s}x${s}@2x.png" >/dev/null
+  done
+  iconutil -c icns "$ICONSET" -o assets/AppIcon.icns
+fi
+[ -f assets/AppIcon.icns ] && cp assets/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 
 cat > "$APP/Contents/Info.plist" <<PLIST_EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -32,6 +44,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST_EOF
     <key>CFBundleDisplayName</key>     <string>Screen Reader</string>
     <key>CFBundleIdentifier</key>      <string>com.local.screenreader</string>
     <key>CFBundleExecutable</key>      <string>ScreenReader</string>
+    <key>CFBundleIconFile</key>        <string>AppIcon</string>
     <key>CFBundlePackageType</key>     <string>APPL</string>
     <key>CFBundleShortVersionString</key> <string>1.0</string>
     <key>LSUIElement</key>             <true/>
