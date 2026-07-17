@@ -19,6 +19,17 @@ selection — each press-and-drag translates exactly one area.
 Everything runs **locally**: Apple's **Vision** framework for on-device OCR
 and `say` for speech.
 
+## Example
+
+Reading a PDF's table of contents in WPS Office — press ⇧⌘1, drag over the
+section you want (yellow frame), and the recognised text is pinned in the
+panel beside it, ready to copy or hear read aloud:
+
+![Selecting a PDF section and getting the text pinned beside it](docs/example.png)
+
+The **⧉ Copy** button puts the text on the clipboard; **✕ Cancel translation**
+below the selection dismisses the overlay (or just press ⇧⌘1 again).
+
 ## Hotkeys
 
 | Shortcut | Action |
