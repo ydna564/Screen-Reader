@@ -508,7 +508,19 @@ class OverlaySession(object):
 # --------------------------------------------------------------------------
 class ScreenReaderApp(rumps.App):
     def __init__(self):
-        super().__init__("👁", quit_button=None)
+        icon_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "assets", "menubar_icon.png")
+        if os.path.exists(icon_path):
+            super().__init__("", icon=icon_path, template=True,
+                             quit_button=None)
+            # keep retina detail but constrain height to the menu bar
+            if getattr(self, "_icon_nsimage", None) is not None:
+                self._icon_nsimage.setSize_((20, 20))
+            self._has_icon = True
+        else:
+            super().__init__("📖", quit_button=None)
+            self._has_icon = False
         # Accessory policy = pure menu-bar app. A "regular" app (the default
         # for a bare python process) switches Spaces when activated, which
         # yanked the user out of full-screen apps back to the desktop.
@@ -591,18 +603,22 @@ class ScreenReaderApp(rumps.App):
     def target(self):
         return LANGUAGES[self.target_index]
 
-    # ---- menu-bar title reflects state ----
+    # ---- menu-bar title reflects state (monochrome, beside the book icon) ----
     def _tick(self, _timer):
         if self.selection is not None:
-            self.title = "👁 ✚"
+            state = "+"          # selecting
         elif self.busy:
-            self.title = "👁 ⏳"
+            state = "…"          # recognising
         elif self.current_say is not None:
-            self.title = "👁 🔊"
+            state = "♪"          # speaking
         elif self.session is not None:
-            self.title = "👁 📌"
+            state = "•"          # overlay pinned
         else:
-            self.title = "👁"
+            state = ""           # idle
+        if self._has_icon:
+            self.title = (" " + state) if state else ""
+        else:
+            self.title = ("📖 " + state) if state else "📖"
 
     # ---- one-shot selection flow (main thread) ----
     def toggle_selection(self):

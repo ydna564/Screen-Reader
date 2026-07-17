@@ -40,7 +40,9 @@ below the selection dismisses the overlay (or just press ⇧⌘1 again).
 Press **Esc** while selecting to abort. You can also trigger/dismiss and pick
 the language from the 👁 icon in the menu bar.
 
-The menu-bar icon shows the state.
+The monochrome book icon in the menu bar shows the state with a small symbol
+beside it: idle (none) · `+` selecting · `…` recognising · `♪` speaking ·
+`•` overlay pinned.
 
 ## Install & run
 
