@@ -1,8 +1,7 @@
 # Screen Reader
 
 A tiny macOS **menu-bar gadget**. Press **⇧⌘1**, drag a rectangle over any
-area of the screen, and the text inside is recognised, optionally translated,
-and **read aloud** in the language you choose from the menu-bar icon — while:
+area of the screen, the text inside is recognised in the language you choose from the menu-bar icon and optionally translated, while:
 
 - the **selected area stays highlighted** on screen,
 - the **translated text is pinned in a panel beside the selection** as a
@@ -30,8 +29,7 @@ and `say` for speech.
 Press **Esc** while selecting to abort. You can also trigger/dismiss and pick
 the language from the 👁 icon in the menu bar.
 
-The menu-bar icon shows the state:
-`👁` idle · `👁 ✚` selecting · `👁 ⏳` recognising · `👁 🔊` speaking · `👁 📌` overlay pinned.
+The menu-bar icon shows the state.
 
 ## Install & run
 
@@ -61,11 +59,8 @@ After granting it, quit and relaunch the tool.
 
 ## Choosing the spoken language
 
-Click the 👁 menu-bar icon → **Language**. The default is **English**. Your
-choice is remembered in `~/.screenreader.json`. Each language uses a matching
-macOS voice; install extra voices in **System Settings → Accessibility → Spoken
-Content → System Voice → Manage Voices** if a language sounds like the wrong
-accent.
+Click the menu-bar icon → **Language**. The default is **English**. Your
+choice is remembered in `~/.screenreader.json`.
 
 ## Optional: offline translation
 
@@ -106,5 +101,5 @@ removes the autostart and the app bundle.
 **One-time after installing:** grant **Screen Recording**, **Accessibility**
 (and **Input Monitoring**, if listed) to **ScreenReader** in System Settings →
 Privacy & Security — permissions given to Terminal don't carry over to the new
-app. Then quit (👁 → Quit) and reopen it once. Logs go to
+app. Then quit and reopen it once. Logs go to
 `~/Library/Logs/ScreenReader.log` if anything misbehaves.
