@@ -1,4 +1,4 @@
-# Screen Reader / Translator
+# Screen Reader
 
 A tiny macOS **menu-bar gadget**. Press **⇧⌘1**, drag a rectangle over any
 area of the screen, and the text inside is recognised, optionally translated,
