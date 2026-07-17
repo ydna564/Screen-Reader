@@ -1,0 +1,9 @@
+# virtualenv — recreated by install.sh / run.sh
+.venv/
+
+# python cache
+__pycache__/
+*.pyc
+
+# macOS noise
+.DS_Store

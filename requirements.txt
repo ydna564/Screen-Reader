@@ -1,0 +1,9 @@
+rumps
+pynput
+pyobjc-framework-Vision
+pyobjc-framework-Quartz
+
+# Optional — enables offline text translation between languages.
+# Uncomment, reinstall, then download language packages (see README).
+# argostranslate
+# langdetect

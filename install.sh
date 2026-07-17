@@ -1,0 +1,88 @@
+#!/bin/bash
+# Installs Screen Reader as a persistent, login-launched menu-bar app:
+#   1. builds a real app bundle  ~/Applications/ScreenReader.app
+#   2. registers a LaunchAgent so it starts automatically at login
+#   3. launches it now
+# Run again any time — it's idempotent and refreshes everything.
+set -e
+cd "$(dirname "$0")"
+PROJ="$(pwd)"
+APP="$HOME/Applications/ScreenReader.app"
+PLIST="$HOME/Library/LaunchAgents/com.local.screenreader.plist"
+
+# --- venv (first run only) ---
+if [ ! -d .venv ]; then
+  echo "Creating virtualenv and installing dependencies…"
+  python3 -m venv .venv
+  ./.venv/bin/pip install --upgrade pip >/dev/null
+  ./.venv/bin/pip install -r requirements.txt
+fi
+
+# --- app bundle ---
+echo "Building $APP …"
+mkdir -p "$APP/Contents/MacOS"
+
+cat > "$APP/Contents/Info.plist" <<PLIST_EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>            <string>ScreenReader</string>
+    <key>CFBundleDisplayName</key>     <string>Screen Reader</string>
+    <key>CFBundleIdentifier</key>      <string>com.local.screenreader</string>
+    <key>CFBundleExecutable</key>      <string>ScreenReader</string>
+    <key>CFBundlePackageType</key>     <string>APPL</string>
+    <key>CFBundleShortVersionString</key> <string>1.0</string>
+    <key>LSUIElement</key>             <true/>
+    <key>NSHighResolutionCapable</key> <true/>
+</dict>
+</plist>
+PLIST_EOF
+
+cat > "$APP/Contents/MacOS/ScreenReader" <<LAUNCH_EOF
+#!/bin/bash
+mkdir -p "\$HOME/Library/Logs"
+exec "$PROJ/.venv/bin/python" "$PROJ/screenreader.py" \\
+     >> "\$HOME/Library/Logs/ScreenReader.log" 2>&1
+LAUNCH_EOF
+chmod +x "$APP/Contents/MacOS/ScreenReader"
+
+# --- launch agent: start at every login ---
+echo "Registering LaunchAgent…"
+mkdir -p "$HOME/Library/LaunchAgents"
+cat > "$PLIST" <<AGENT_EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>   <string>com.local.screenreader</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/open</string>
+        <string>-a</string>
+        <string>$APP</string>
+    </array>
+    <key>RunAtLoad</key> <true/>
+</dict>
+</plist>
+AGENT_EOF
+launchctl unload "$PLIST" 2>/dev/null || true
+launchctl load "$PLIST"
+
+# --- restart the app cleanly ---
+pkill -f "screenreader.py" 2>/dev/null || true
+sleep 1
+open -a "$APP"
+
+echo
+echo "✅ Installed. Screen Reader now starts automatically at login."
+echo
+echo "⚠️  One-time step: grant permissions to the NEW app in"
+echo "   System Settings → Privacy & Security:"
+echo "     • Screen Recording  → enable “ScreenReader”"
+echo "     • Accessibility     → enable “ScreenReader”"
+echo "     • Input Monitoring  → enable “ScreenReader” (if listed)"
+echo "   (permissions previously granted to Terminal don't carry over)"
+echo "   Then quit (👁 → Quit) and reopen it once: open -a \"$APP\""

@@ -1,0 +1,110 @@
+# Screen Reader / Translator
+
+A tiny macOS **menu-bar gadget**. Press **⇧⌘1**, drag a rectangle over any
+area of the screen, and the text inside is recognised, optionally translated,
+and **read aloud** in the language you choose from the menu-bar icon — while:
+
+- the **selected area stays highlighted** on screen,
+- the **translated text is pinned in a panel beside the selection** as a
+  reference,
+- a **“✕ Cancel translation” button just below the selection** dismisses it,
+- a **“⧉ Copy” button in the panel** puts the text on the clipboard (the
+  panel text is also selectable with the mouse). **Copy Last Text** in the
+  menu-bar menu recovers the most recent result even after dismissing.
+
+**⇧⌘1 is the only hotkey and works as a toggle**: press it to start a
+selection; press it again to cancel the selection, dismiss the pinned
+overlay, or stop speech. Once cleared, press it once more for the next
+selection — each press-and-drag translates exactly one area.
+
+Everything runs **locally**: Apple's **Vision** framework for on-device OCR
+and `say` for speech.
+
+## Hotkeys
+
+| Shortcut | Action |
+|----------|--------|
+| **⇧⌘1** (idle) | Select an area and translate it (one selection per press) |
+| **⇧⌘1** (again) | Cancel the selection / dismiss the pinned overlay / stop speech |
+
+Press **Esc** while selecting to abort. You can also trigger/dismiss and pick
+the language from the 👁 icon in the menu bar.
+
+The menu-bar icon shows the state:
+`👁` idle · `👁 ✚` selecting · `👁 ⏳` recognising · `👁 🔊` speaking · `👁 📌` overlay pinned.
+
+## Install & run
+
+```bash
+cd ~/screen-reader
+./run.sh          # first run creates a venv and installs dependencies
+```
+
+Or manually:
+
+```bash
+python3 -m venv .venv
+./.venv/bin/pip install -r requirements.txt
+./.venv/bin/python screenreader.py
+```
+
+## macOS permissions (required)
+
+Grant these to whichever app launches the tool (Terminal, iTerm, or the packaged
+app) in **System Settings → Privacy & Security**:
+
+- **Screen Recording** — so the region can be captured.
+- **Accessibility** — so the global ⇧⌘1 hotkey works.
+
+If the hotkeys don't respond, it's almost always the Accessibility permission.
+After granting it, quit and relaunch the tool.
+
+## Choosing the spoken language
+
+Click the 👁 menu-bar icon → **Language**. The default is **English**. Your
+choice is remembered in `~/.screenreader.json`. Each language uses a matching
+macOS voice; install extra voices in **System Settings → Accessibility → Spoken
+Content → System Voice → Manage Voices** if a language sounds like the wrong
+accent.
+
+## Optional: offline translation
+
+Out of the box the recognised text is spoken **as written**, using the voice of
+your selected language. To actually *translate* the source text into your chosen
+language first:
+
+```bash
+./.venv/bin/pip install argostranslate langdetect
+```
+
+Then download the language pairs you want, e.g. French → English:
+
+```python
+./.venv/bin/python - <<'PY'
+import argostranslate.package as p
+p.update_package_index()
+avail = p.get_available_packages()
+pkg = next(x for x in avail if x.from_code=="fr" and x.to_code=="en")
+p.install_from_path(pkg.download())
+PY
+```
+
+Restart the app. It will auto-detect the source language and translate into the
+language selected in the menu before speaking.
+
+## Install as a system app (starts at login, no Terminal needed)
+
+```bash
+./install.sh
+```
+
+This builds `~/Applications/ScreenReader.app` (a real menu-bar app wrapping
+this project), registers a LaunchAgent so it launches at every login, and
+starts it immediately. Re-run it any time to refresh; `./uninstall.sh`
+removes the autostart and the app bundle.
+
+**One-time after installing:** grant **Screen Recording**, **Accessibility**
+(and **Input Monitoring**, if listed) to **ScreenReader** in System Settings →
+Privacy & Security — permissions given to Terminal don't carry over to the new
+app. Then quit (👁 → Quit) and reopen it once. Logs go to
+`~/Library/Logs/ScreenReader.log` if anything misbehaves.
