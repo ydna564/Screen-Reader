@@ -75,6 +75,26 @@ After granting it, quit and relaunch the tool.
 Click the menu-bar icon → **Language**. The default is **English**. Your
 choice is remembered in `~/.screenreader.json`.
 
+## Project Structure
+
+```
+screen-reader/
+├── screenreader.py           The whole app: menu-bar item, region selector,
+│                             Vision OCR, translation, speech, pinned overlay
+├── install.sh                Builds ~/Applications/ScreenReader.app and
+│                             registers the LaunchAgent for login autostart
+├── uninstall.sh              Removes the app bundle and the autostart entry
+├── run.sh                    Dev mode: creates the venv and runs the script
+├── requirements.txt          rumps, pynput, pyobjc (Vision + Quartz)
+├── assets/
+│   ├── logo.png              Source artwork for the app icon
+│   ├── AppIcon.icns          Generated multi-resolution app icon
+│   ├── menubar_icon.png      Monochrome template icon for the menu bar
+│   └── make_menubar_icon.py  Regenerates menubar_icon.png
+└── docs/
+    └── example.png           Screenshot used in this README
+```
+
 ## Optional: offline translation
 
 Out of the box the recognised text is spoken **as written**, using the voice of
