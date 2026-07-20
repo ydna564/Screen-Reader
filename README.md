@@ -11,10 +11,10 @@ area of the screen, the text inside is recognised in the language you choose fro
   panel text is also selectable with the mouse). **Copy Last Text** in the
   menu-bar menu recovers the most recent result even after dismissing.
 
-**⇧⌘1 is the only hotkey and works as a toggle**: press it to start a
-selection; press it again to cancel the selection, dismiss the pinned
+**⇧⌘1 is the hotkey and works as a toggle**: press it to start a
+selection, press it again to cancel the selection, dismiss the pinned
 overlay, or stop speech. Once cleared, press it once more for the next
-selection — each press-and-drag translates exactly one area.
+selection. Each press-and-drag translates exactly one area.
 
 Everything runs **locally**: Apple's **Vision** framework for on-device OCR
 and `say` for speech.
@@ -23,7 +23,7 @@ and `say` for speech.
 
 Reading a PDF's table of contents in WPS Office — press ⇧⌘1, drag over the
 section you want (yellow frame), and the recognised text is pinned in the
-panel beside it, ready to copy or hear read aloud:
+panel beside it, ready to copy:
 
 ![Selecting a PDF section and getting the text pinned beside it](docs/example.png)
 
