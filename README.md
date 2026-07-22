@@ -21,13 +21,13 @@ and `say` for speech.
 
 ## Example
 
-Reading a PDF's table of contents in WPS Office — press ⇧⌘1, drag over the
+Reading a PDF's table of contents in WPS Office, press ⇧⌘1, drag over the
 section you want (yellow frame), and the recognised text is pinned in the
-panel beside it, ready to copy:
+panel beside it, ready to copy.
 
 ![Selecting a PDF section and getting the text pinned beside it](docs/example.png)
 
-The **⧉ Copy** button puts the text on the clipboard; **✕ Cancel translation**
+The **⧉ Copy** button puts the text on the clipboard, and **✕ Cancel translation**
 below the selection dismisses the overlay (or just press ⇧⌘1 again).
 
 ## Hotkeys
@@ -79,12 +79,12 @@ choice is remembered in `~/.screenreader.json`.
 
 ```
 screen-reader/
-├── screenreader.py           The whole app: menu-bar item, region selector,
+├── screenreader.py           The whole app, with menu-bar item, region selector,
 │                             Vision OCR, translation, speech, pinned overlay
 ├── install.sh                Builds ~/Applications/ScreenReader.app and
 │                             registers the LaunchAgent for login autostart
 ├── uninstall.sh              Removes the app bundle and the autostart entry
-├── run.sh                    Dev mode: creates the venv and runs the script
+├── run.sh                    Dev mode that creates the venv and runs the script
 ├── requirements.txt          rumps, pynput, pyobjc (Vision + Quartz)
 ├── assets/
 │   ├── logo.png              Source artwork for the app icon
