@@ -16,6 +16,7 @@ recognised on-device, pinned beside your selection, and spoken aloud.
 [![Apple Vision](https://img.shields.io/badge/OCR-Apple%20Vision-1E4A5F?logo=apple&logoColor=white&style=flat-square)](https://developer.apple.com/documentation/vision)
 [![100% Local](https://img.shields.io/badge/privacy-100%25%20on--device-1E4A5F?style=flat-square)](#-macos-permissions-required)
 [![Menu bar](https://img.shields.io/badge/lives%20in-the%20menu%20bar-1E4A5F?style=flat-square)](#hotkeys)
+[![License: MIT](https://img.shields.io/badge/license-MIT-1E4A5F?style=flat-square)](LICENSE)
 
 </div>
 
