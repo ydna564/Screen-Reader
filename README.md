@@ -112,11 +112,11 @@ You can also trigger, dismiss, and choose the language from the book icon in the
 
 ## Configuration
 
-Click the menu-bar icon and open the Language submenu to choose the spoken and translated language. The default is English. Your choice is written to `~/.screenreader.json` and restored on the next launch.
+Click the menu-bar icon and open the Language submenu to choose the spoken and translated language. The default is English. Use the Read Aloud item in the same menu to turn speech on or off. When it is off the recognised text is still shown in the pinned panel and copied, it is just not spoken. Both choices are written to `~/.screenreader.json` and restored on the next launch.
 
 | File | Purpose |
 |------|---------|
-| `~/.screenreader.json` | stores the selected target language index |
+| `~/.screenreader.json` | stores the selected target language index and the Read Aloud preference |
 | `~/Library/Logs/ScreenReader.log` | output of the installed app, useful when something misbehaves |
 
 ## How it works
@@ -128,7 +128,7 @@ The whole tool is one Python file backed by PyObjC bindings to the native macOS 
 3. The chosen rectangle is captured with the `screencapture` command into a temporary PNG.
 4. Apple's Vision framework recognises the text with the accurate recognition level and language correction, then the temporary file is deleted.
 5. If Argos Translate is installed, langdetect identifies the source language and the text is translated into your target. Without it, the recognised text passes through unchanged.
-6. The result is spoken with `say` using a voice chosen for the target language, and pinned in a panel beside the original selection with a Copy button and a Cancel button.
+6. The result is pinned in a panel beside the original selection with a Copy button and a Cancel button. When Read Aloud is on it is also spoken with `say` using a voice chosen for the target language.
 
 The overlay windows use a collection behaviour that joins all Spaces and full-screen auxiliaries, and the process runs under the accessory activation policy. That combination is the key design decision. It keeps the tool out of the Dock and stops macOS from yanking you out of a full-screen app when the overlay appears.
 

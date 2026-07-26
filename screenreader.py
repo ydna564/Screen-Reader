@@ -560,6 +560,7 @@ class ScreenReaderApp(rumps.App):
         self.target_index = cfg.get("target_index", 0)
         if not (0 <= self.target_index < len(LANGUAGES)):
             self.target_index = 0
+        self.read_aloud = bool(cfg.get("read_aloud", True))
 
         self.last_text = None
 
@@ -569,6 +570,9 @@ class ScreenReaderApp(rumps.App):
             "Dismiss / Stop", callback=self.on_stop)
         self.copy_item = rumps.MenuItem(
             "Copy Last Text", callback=self.on_copy_last)
+        self.read_item = rumps.MenuItem(
+            "Read Aloud", callback=self.on_toggle_read)
+        self.read_item.state = 1 if self.read_aloud else 0
 
         self.lang_menu = rumps.MenuItem("Language")
         self._lang_items = []
@@ -583,6 +587,7 @@ class ScreenReaderApp(rumps.App):
             self.stop_item,
             self.copy_item,
             None,
+            self.read_item,
             self.lang_menu,
             None,
             rumps.MenuItem("About", callback=self.on_about),
@@ -674,7 +679,8 @@ class ScreenReaderApp(rumps.App):
             spoken = translate(text, target[2])
             self.last_text = spoken
             AppHelper.callAfter(self._show_session, rect, spoken, target[0])
-            self._speak(spoken)
+            if self.read_aloud:
+                self._speak(spoken)
         except Exception as e:
             notify("Error", str(e))
         finally:
@@ -747,6 +753,13 @@ class ScreenReaderApp(rumps.App):
     def on_stop(self, _):
         AppHelper.callAfter(self.dismiss_all)
 
+    def on_toggle_read(self, _):
+        self.read_aloud = not self.read_aloud
+        self.read_item.state = 1 if self.read_aloud else 0
+        if not self.read_aloud:
+            self._stop_speech()      # silence any current playback
+        self._save_cfg()
+
     def on_copy_last(self, _):
         if self.last_text:
             copy_to_clipboard(self.last_text)
@@ -786,7 +799,8 @@ class ScreenReaderApp(rumps.App):
     def _save_cfg(self):
         try:
             with open(CONFIG_PATH, "w") as f:
-                json.dump({"target_index": self.target_index}, f)
+                json.dump({"target_index": self.target_index,
+                           "read_aloud": self.read_aloud}, f)
         except Exception:
             pass
 
