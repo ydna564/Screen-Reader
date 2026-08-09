@@ -75,24 +75,15 @@ CONFIG_PATH = os.path.expanduser("~/.screenreader.json")
 # display name, Vision/BCP-47 code, argos 2-letter code, preferred `say` voices
 LANGUAGES = [
     ("English",            "en-US",   "en", ["Samantha", "Alex", "Daniel"]),
-    ("Spanish",            "es-ES",   "es", ["Monica", "Paulina", "Jorge"]),
-    ("French",             "fr-FR",   "fr", ["Thomas", "Amelie", "Aurelie"]),
-    ("German",             "de-DE",   "de", ["Anna", "Markus", "Petra"]),
-    ("Italian",            "it-IT",   "it", ["Alice", "Luca"]),
-    ("Portuguese",         "pt-BR",   "pt", ["Luciana", "Joana"]),
-    ("Russian",            "ru-RU",   "ru", ["Milena", "Yuri"]),
     ("Chinese (Mandarin)", "zh-Hans", "zh", ["Tingting", "Meijia"]),
-    ("Japanese",           "ja-JP",   "ja", ["Kyoko", "Otoya"]),
-    ("Korean",             "ko-KR",   "ko", ["Yuna"]),
 ]
 
 # argos 2-letter code -> display name, for labelling the panel
 LANG_BY_CODE = {argos: name for name, _b, argos, _v in LANGUAGES}
 
-DEFAULT_OCR_LANGS = [
-    "en-US", "fr-FR", "de-DE", "es-ES", "it-IT", "pt-BR",
-    "zh-Hans", "ja-JP", "ko-KR", "ru-RU",
-]
+# Only the two supported languages are recognised, which also keeps Vision
+# from misreading Chinese as a visually similar script.
+DEFAULT_OCR_LANGS = ["en-US", "zh-Hans"]
 
 PANEL_WIDTH = 340
 PANEL_PAD = 14
@@ -164,12 +155,28 @@ def ocr_image(path, languages):
     return "\n".join(lines)
 
 
+_HAN_RE = re.compile(r"[㐀-䶿一-鿿豈-﫿]")
+_LATIN_RE = re.compile(r"[A-Za-z]")
+
+
 def _detect_source(text):
+    """Decide which of the two supported languages the text is written in.
+
+    Testing for Han characters beats a general purpose detector here, because
+    detectors routinely label a short Chinese line as Japanese or Korean and
+    that would block the only translation route the app supports.
+    """
+    if _HAN_RE.search(text):
+        return "zh"
+    if _LATIN_RE.search(text):
+        return "en"
     if _HAS_LANGDETECT:
         try:
-            return _detect_lang(text).split("-")[0]
+            code = _detect_lang(text).split("-")[0]
+            if code in ("zh", "en"):
+                return code
         except Exception:
-            return None
+            pass
     return None
 
 
@@ -866,9 +873,10 @@ class ScreenReaderApp(rumps.App):
         rumps.alert(
             "Screen Reader / Translator",
             "Press ⇧⌘1 and drag over any area of the screen. The text is "
-            "read aloud and pinned beside the selection in your chosen "
-            "language.\n\n"
-            "⇧⌘1  select & translate — press again to cancel/dismiss\n\n"
+            "pinned beside the selection, and read aloud when Read Aloud "
+            "is on.\n\n"
+            "⇧⌘1  select & translate, press again to cancel or dismiss\n\n"
+            "Translates between Chinese and English only.\n\n"
             "Current language: {}\n"
             "Translation: {}".format(
                 self.target[0],

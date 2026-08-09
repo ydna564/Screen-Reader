@@ -37,7 +37,7 @@ It is deliberately small. There is no window to manage, no account, and no cloud
 - **Pinned beside the selection.** The result sits in a panel next to the area you drew, with the original region kept highlighted for reference.
 - **Copy without retyping.** A Copy button puts the text on the clipboard, the panel text is mouse-selectable, and Copy Last Text in the menu recovers the most recent result after dismissing.
 - **Offline translation.** The source language is detected automatically and the text is translated into your chosen target before it is shown and spoken, with language packs cached locally after a one-time download.
-- **Ten languages.** English, Spanish, French, German, Italian, Portuguese, Russian, Chinese, Japanese, and Korean for both recognition and speech.
+- **Chinese and English.** Both languages are recognised, translated, and spoken, in either direction.
 - **Works over full-screen apps.** The overlay joins every Space, so it appears on top of full-screen windows rather than kicking you back to the desktop.
 
 ## Example
@@ -137,18 +137,16 @@ The overlay windows use a collection behaviour that joins all Spaces and full-sc
 
 Translation is built in and runs on this machine through Argos Translate. Nothing is sent to a server.
 
-Pick a target language in the menu-bar Language submenu, then select any text on screen. The source language is detected automatically with langdetect, and the text is translated before it is pinned in the panel and spoken. The panel header tells you what happened, for example `French to English` when it translated, or `Recognised text, already English` when no translation was needed.
+Translation runs between Chinese and English only, in either direction. Pick a target language in the menu-bar Language submenu, then select any text on screen. The source language is detected from the characters themselves, so a line of Chinese is never mistaken for another script. The text is translated before it is pinned in the panel, and spoken when Read Aloud is on. The panel header tells you what happened, for example `Chinese to English` when it translated, or `Recognised text, already English` when no translation was needed.
 
-Language packs are fetched the first time a given pair is used, then cached under `~/.local/share/argos-translate` and reused offline forever. The menu-bar icon shows `↓` during that one-time download and a notification names the pair being fetched. Each pack is a few hundred megabytes.
-
-Pairs without a direct pack are routed through English automatically. French into Spanish, for example, installs French to English and English to Spanish and pivots through them.
+The two language packs are fetched the first time each direction is used, then cached under `~/.local/share/argos-translate` and reused offline forever. The menu-bar icon shows `↓` during that one-time download and a notification names the pair being fetched. Each pack is a few hundred megabytes.
 
 | Situation | What the panel header shows |
 |-----------|-----------------------------|
-| text was translated | `French to English` |
+| text was translated | `Chinese to English` |
 | source already matches the target | `Recognised text, already English` |
-| no pack exists for that pair | `Recognised text, no X to Y pack` |
-| source language could not be detected | `Recognised text` |
+| the pack could not be installed | `Recognised text, no X to Y pack` |
+| text is neither Chinese nor English | `Recognised text` |
 
 ## Install as a system app
 
