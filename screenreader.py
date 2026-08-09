@@ -49,10 +49,25 @@ except Exception:
     _HAS_ARGOS = False
 
 try:
+    import argostranslate.package as argos_package
+    _HAS_ARGOS_PKG = True
+except Exception:
+    _HAS_ARGOS_PKG = False
+
+try:
     from langdetect import detect as _detect_lang
     _HAS_LANGDETECT = True
 except Exception:
     _HAS_LANGDETECT = False
+
+# The framework Python ships without a CA bundle, so package downloads fail
+# with a certificate error unless certifi's bundle is pointed at explicitly.
+try:
+    import certifi
+    os.environ.setdefault("SSL_CERT_FILE", certifi.where())
+    os.environ.setdefault("REQUESTS_CA_BUNDLE", certifi.where())
+except Exception:
+    pass
 
 
 CONFIG_PATH = os.path.expanduser("~/.screenreader.json")
@@ -70,6 +85,9 @@ LANGUAGES = [
     ("Japanese",           "ja-JP",   "ja", ["Kyoko", "Otoya"]),
     ("Korean",             "ko-KR",   "ko", ["Yuna"]),
 ]
+
+# argos 2-letter code -> display name, for labelling the panel
+LANG_BY_CODE = {argos: name for name, _b, argos, _v in LANGUAGES}
 
 DEFAULT_OCR_LANGS = [
     "en-US", "fr-FR", "de-DE", "es-ES", "it-IT", "pt-BR",
@@ -155,16 +173,67 @@ def _detect_source(text):
     return None
 
 
-def translate(text, to_code):
-    if not _HAS_ARGOS:
-        return text
-    from_code = _detect_source(text)
-    if not from_code or from_code == to_code:
-        return text
+def _have_pair(from_code, to_code):
     try:
-        return argos_translate.translate(text, from_code, to_code)
+        return any(p.from_code == from_code and p.to_code == to_code
+                   for p in argos_package.get_installed_packages())
     except Exception:
-        return text
+        return False
+
+
+def _install_pair(from_code, to_code, on_status=None):
+    """Download and install one language pair. Returns True when usable."""
+    if _have_pair(from_code, to_code):
+        return True
+    if not _HAS_ARGOS_PKG:
+        return False
+    try:
+        argos_package.update_package_index()
+        pkg = next((x for x in argos_package.get_available_packages()
+                    if x.from_code == from_code and x.to_code == to_code), None)
+        if pkg is None:
+            return False
+        if on_status:
+            on_status("Downloading %s to %s language pack, first time only"
+                      % (from_code, to_code))
+        argos_package.install_from_path(pkg.download())
+        return True
+    except Exception:
+        return False
+
+
+def ensure_route(from_code, to_code, on_status=None):
+    """Make a translation route available, directly or pivoting via English."""
+    if _install_pair(from_code, to_code, on_status):
+        return True
+    if "en" in (from_code, to_code):
+        return False
+    return (_install_pair(from_code, "en", on_status)
+            and _install_pair("en", to_code, on_status))
+
+
+def translate(text, to_code, on_status=None):
+    """Translate text into to_code.
+
+    Returns (output_text, source_code, translated) so the caller can tell the
+    user what actually happened instead of silently passing text through.
+    """
+    if not _HAS_ARGOS:
+        return text, None, False
+    from_code = _detect_source(text)
+    if not from_code:
+        return text, None, False
+    if from_code == to_code:
+        return text, from_code, False
+    if not ensure_route(from_code, to_code, on_status):
+        return text, from_code, False
+    try:
+        out = argos_translate.translate(text, from_code, to_code)
+    except Exception:
+        return text, from_code, False
+    if not out or not out.strip():
+        return text, from_code, False
+    return out, from_code, True
 
 
 def notify(title, message):
@@ -368,7 +437,7 @@ class SelectionController(object):
 # pinned result overlay: border + text panel + cancel button
 # --------------------------------------------------------------------------
 class OverlaySession(object):
-    def __init__(self, rect, text, lang_name, on_cancel):
+    def __init__(self, rect, text, header_text, on_cancel):
         self.windows = []
         self._text = text
         self._copy_btn = None
@@ -388,7 +457,7 @@ class OverlaySession(object):
         self.windows.append(border)
 
         # 2) translated-text panel beside the selection
-        panel = self._build_panel(rect, text, lang_name, screen, level)
+        panel = self._build_panel(rect, text, header_text, screen, level)
         self.windows.append(panel)
 
         # 3) cancel button just below the selection
@@ -399,10 +468,10 @@ class OverlaySession(object):
             w.orderFrontRegardless()
 
     # ---- panel ----
-    def _build_panel(self, rect, text, lang_name, screen, level):
+    def _build_panel(self, rect, text, header_text, screen, level):
         inner_w = PANEL_WIDTH - 2 * PANEL_PAD
 
-        header = AppKit.NSTextField.labelWithString_("Translation → " + lang_name)
+        header = AppKit.NSTextField.labelWithString_(header_text)
         header.setFont_(AppKit.NSFont.boldSystemFontOfSize_(11))
         header.setTextColor_(
             AppKit.NSColor.colorWithCalibratedWhite_alpha_(1.0, 0.6))
@@ -530,6 +599,7 @@ class ScreenReaderApp(rumps.App):
         self.selection = None       # active SelectionController
         self.session = None         # active OverlaySession
         self.busy = False
+        self.downloading = False
         self.current_say = None
 
         # accessibility permission check (needed for the global hotkeys) —
@@ -612,6 +682,8 @@ class ScreenReaderApp(rumps.App):
     def _tick(self, _timer):
         if self.selection is not None:
             state = "+"          # selecting
+        elif self.downloading:
+            state = "↓"          # fetching a language pack
         elif self.busy:
             state = "…"          # recognising
         elif self.current_say is not None:
@@ -653,6 +725,21 @@ class ScreenReaderApp(rumps.App):
             self.session = None
         self._stop_speech()
 
+    @staticmethod
+    def _panel_header(src_code, translated, target):
+        """Label the panel with what actually happened to the text."""
+        target_name, target_code = target[0], target[2]
+        src_name = LANG_BY_CODE.get(src_code, src_code)
+        if translated:
+            return "%s to %s" % (src_name, target_name)
+        if not _HAS_ARGOS:
+            return "Recognised text, translation not installed"
+        if src_code is None:
+            return "Recognised text"
+        if src_code == target_code:
+            return "Recognised text, already %s" % target_name
+        return "Recognised text, no %s to %s pack" % (src_name, target_name)
+
     # ---- background processing ----
     def _process(self, rect):
         self.busy = True
@@ -676,9 +763,18 @@ class ScreenReaderApp(rumps.App):
             if not text.strip():
                 notify("", "No text found in selection.")
                 return
-            spoken = translate(text, target[2])
+            self.downloading = False
+
+            def _status(msg):
+                self.downloading = True
+                notify("Screen Reader", msg)
+
+            spoken, src, did = translate(
+                text, target[2], on_status=_status)
+            self.downloading = False
             self.last_text = spoken
-            AppHelper.callAfter(self._show_session, rect, spoken, target[0])
+            header = self._panel_header(src, did, target)
+            AppHelper.callAfter(self._show_session, rect, spoken, header)
             if self.read_aloud:
                 self._speak(spoken)
         except Exception as e:
@@ -699,11 +795,11 @@ class ScreenReaderApp(rumps.App):
             os.remove(path)
         return None
 
-    def _show_session(self, rect, text, lang_name):
+    def _show_session(self, rect, text, header_text):
         if self.session is not None:
             self.session.close()
         self.session = OverlaySession(
-            rect, text, lang_name, self._cancel_clicked)
+            rect, text, header_text, self._cancel_clicked)
 
     def _cancel_clicked(self):
         if self.session is not None:
@@ -776,7 +872,8 @@ class ScreenReaderApp(rumps.App):
             "Current language: {}\n"
             "Translation: {}".format(
                 self.target[0],
-                "on" if _HAS_ARGOS else "off (install argostranslate to enable)",
+                "offline, language packs download on first use"
+                if _HAS_ARGOS else "not installed",
             ),
         )
 

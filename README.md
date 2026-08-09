@@ -23,7 +23,7 @@ Press `⇧⌘1`, drag a box over anything (text, a PDF, an image, a caption), an
 
 ## What is this
 
-Screen Reader is a menu-bar accessory for macOS. It turns any rectangle you draw on the screen into text you can hear, read, and copy. The recognition uses Apple's Vision framework, the speech uses the built-in `say` command, and the optional translation uses Argos Translate. All three run on your machine, so nothing you select ever leaves your Mac.
+Screen Reader is a menu-bar accessory for macOS. It turns any rectangle you draw on the screen into text you can hear, read, and copy. The recognition uses Apple's Vision framework, the speech uses the built-in `say` command, and the translation uses Argos Translate. All three run on your machine, so nothing you select ever leaves your Mac.
 
 It exists to solve a narrow but common annoyance. Plenty of text on a screen cannot be selected with the cursor. Scanned PDFs, images, video captions, embedded UI labels, and screenshots are all opaque to normal copy and paste. The usual workaround is to retype the text by hand or to paste a screenshot into a web service that ships your pixels to a server. Screen Reader replaces both. You draw a box and the text comes back, spoken and ready to copy, without a network round trip.
 
@@ -36,7 +36,7 @@ It is deliberately small. There is no window to manage, no account, and no cloud
 - **Spoken aloud automatically.** The recognised text is read with a native macOS voice matched to your chosen language.
 - **Pinned beside the selection.** The result sits in a panel next to the area you drew, with the original region kept highlighted for reference.
 - **Copy without retyping.** A Copy button puts the text on the clipboard, the panel text is mouse-selectable, and Copy Last Text in the menu recovers the most recent result after dismissing.
-- **Optional offline translation.** Install Argos Translate and the tool auto-detects the source language and translates into your target before speaking, still fully offline.
+- **Offline translation.** The source language is detected automatically and the text is translated into your chosen target before it is shown and spoken, with language packs cached locally after a one-time download.
 - **Ten languages.** English, Spanish, French, German, Italian, Portuguese, Russian, Chinese, Japanese, and Korean for both recognition and speech.
 - **Works over full-screen apps.** The overlay joins every Space, so it appears on top of full-screen windows rather than kicking you back to the desktop.
 
@@ -58,7 +58,7 @@ The `⧉ Copy` button puts the text on the clipboard. The `✕ Cancel translatio
 - Python 3.9 or newer, available as `python3`
 - Screen Recording and Accessibility permission for whichever app launches the tool, described in [macOS permissions](#macos-permissions-required)
 
-Optional. Argos Translate and langdetect if you want the recognised text translated rather than spoken as written.
+Argos Translate, langdetect, and certifi, all installed automatically by the setup scripts. Language packs download on first use and then work offline.
 
 ## Install and run
 
@@ -107,6 +107,7 @@ You can also trigger, dismiss, and choose the language from the book icon in the
 | none | idle |
 | `+` | selecting |
 | `…` | recognising |
+| `↓` | downloading a language pack, first use only |
 | `♪` | speaking |
 | `•` | overlay pinned |
 
@@ -127,32 +128,27 @@ The whole tool is one Python file backed by PyObjC bindings to the native macOS 
 2. A borderless overlay window dims every screen and lets you rubber-band a rectangle. The overlay is marked as non-capturable, so it never appears in the screenshot itself.
 3. The chosen rectangle is captured with the `screencapture` command into a temporary PNG.
 4. Apple's Vision framework recognises the text with the accurate recognition level and language correction, then the temporary file is deleted.
-5. If Argos Translate is installed, langdetect identifies the source language and the text is translated into your target. Without it, the recognised text passes through unchanged.
+5. langdetect identifies the source language and Argos Translate converts the text into your target, pivoting through English when no direct language pack exists. Packs are downloaded once and then cached locally.
 6. The result is pinned in a panel beside the original selection with a Copy button and a Cancel button. When Read Aloud is on it is also spoken with `say` using a voice chosen for the target language.
 
 The overlay windows use a collection behaviour that joins all Spaces and full-screen auxiliaries, and the process runs under the accessory activation policy. That combination is the key design decision. It keeps the tool out of the Dock and stops macOS from yanking you out of a full-screen app when the overlay appears.
 
-## Optional offline translation
+## Offline translation
 
-Out of the box the recognised text is spoken as written, using the voice of your selected language. To translate the source text into your chosen language first, install the two optional packages.
+Translation is built in and runs on this machine through Argos Translate. Nothing is sent to a server.
 
-```bash
-./.venv/bin/pip install argostranslate langdetect
-```
+Pick a target language in the menu-bar Language submenu, then select any text on screen. The source language is detected automatically with langdetect, and the text is translated before it is pinned in the panel and spoken. The panel header tells you what happened, for example `French to English` when it translated, or `Recognised text, already English` when no translation was needed.
 
-Then download the language pairs you want. For example, French into English.
+Language packs are fetched the first time a given pair is used, then cached under `~/.local/share/argos-translate` and reused offline forever. The menu-bar icon shows `↓` during that one-time download and a notification names the pair being fetched. Each pack is a few hundred megabytes.
 
-```python
-./.venv/bin/python - <<'PY'
-import argostranslate.package as p
-p.update_package_index()
-avail = p.get_available_packages()
-pkg = next(x for x in avail if x.from_code == "fr" and x.to_code == "en")
-p.install_from_path(pkg.download())
-PY
-```
+Pairs without a direct pack are routed through English automatically. French into Spanish, for example, installs French to English and English to Spanish and pivots through them.
 
-Restart the tool. It will auto-detect the source language and translate into the language selected in the menu before speaking. The translation runs locally through Argos Translate, so this path stays offline.
+| Situation | What the panel header shows |
+|-----------|-----------------------------|
+| text was translated | `French to English` |
+| source already matches the target | `Recognised text, already English` |
+| no pack exists for that pair | `Recognised text, no X to Y pack` |
+| source language could not be detected | `Recognised text` |
 
 ## Install as a system app
 
@@ -193,7 +189,7 @@ screen-reader/
 - **Quartz and AppKit** for the screen capture, the dimmed selection overlay, and the pinned result windows
 - **rumps** for the menu-bar item and its menu
 - **pynput** for the global `⇧⌘1` hotkey
-- **Argos Translate and langdetect**, optional, for offline translation
+- **Argos Translate and langdetect**, for offline translation and language detection
 
 ## Limitations and known issues
 

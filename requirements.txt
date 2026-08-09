@@ -3,7 +3,9 @@ pynput
 pyobjc-framework-Vision
 pyobjc-framework-Quartz
 
-# Optional — enables offline text translation between languages.
-# Uncomment, reinstall, then download language packages (see README).
-# argostranslate
-# langdetect
+# Offline translation. Language packs are downloaded on first use and then
+# cached under ~/.local/share/argos-translate, so translation itself runs
+# entirely on this machine.
+argostranslate
+langdetect
+certifi
