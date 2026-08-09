@@ -83,7 +83,11 @@ LANG_BY_CODE = {argos: name for name, _b, argos, _v in LANGUAGES}
 
 # Only the two supported languages are recognised, which also keeps Vision
 # from misreading Chinese as a visually similar script.
-DEFAULT_OCR_LANGS = ["en-US", "zh-Hans"]
+#
+# The order is deliberate and must not be reversed. Vision treats the first
+# entry as the primary language, and listing English first makes it return
+# nothing at all for a Chinese selection. Chinese first reads both scripts.
+OCR_LANGS = ["zh-Hans", "en-US"]
 
 PANEL_WIDTH = 340
 PANEL_PAD = 14
@@ -759,9 +763,7 @@ class ScreenReaderApp(rumps.App):
                 return
             try:
                 target = self.target
-                ocr_langs = list(dict.fromkeys(
-                    [target[1]] + DEFAULT_OCR_LANGS))
-                text = ocr_image(path, ocr_langs)
+                text = ocr_image(path, OCR_LANGS)
             finally:
                 try:
                     os.remove(path)
