@@ -25,9 +25,16 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 # app icon (regenerate the .icns from assets/logo.png if the tools exist)
 if [ -f assets/logo.png ] && command -v iconutil >/dev/null; then
   ICONSET="$(mktemp -d)/AppIcon.iconset"; mkdir -p "$ICONSET"
+  # Trim the transparent padding and scale to the proportion macOS icons use,
+  # otherwise the artwork renders noticeably smaller than every neighbouring
+  # icon in the Dock. Falls back to the raw logo if Pillow is unavailable.
+  ICON_SRC="$(mktemp -d)/icon_src.png"
+  if ! ./.venv/bin/python assets/make_icon.py assets/logo.png "$ICON_SRC" >/dev/null 2>&1; then
+    ICON_SRC=assets/logo.png
+  fi
   for s in 16 32 128 256 512; do
-    sips -z $s $s assets/logo.png --out "$ICONSET/icon_${s}x${s}.png" >/dev/null
-    sips -z $((s*2)) $((s*2)) assets/logo.png \
+    sips -z $s $s "$ICON_SRC" --out "$ICONSET/icon_${s}x${s}.png" >/dev/null
+    sips -z $((s*2)) $((s*2)) "$ICON_SRC" \
          --out "$ICONSET/icon_${s}x${s}@2x.png" >/dev/null
   done
   iconutil -c icns "$ICONSET" -o assets/AppIcon.icns

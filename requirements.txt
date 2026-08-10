@@ -9,3 +9,6 @@ pyobjc-framework-Quartz
 argostranslate
 langdetect
 certifi
+
+# Used by assets/make_icon.py when building the app icon.
+Pillow
