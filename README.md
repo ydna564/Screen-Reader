@@ -113,11 +113,20 @@ You can also trigger, dismiss, and choose the language from the book icon in the
 
 ## Configuration
 
-Click the menu-bar icon and open the Language submenu to choose the spoken and translated language. The default is English. Use the Read Aloud item in the same menu to turn speech on or off. When it is off the recognised text is still shown in the pinned panel and copied, it is just not spoken. Both choices are written to `~/.screenreader.json` and restored on the next launch.
+Click the menu-bar icon and open the Language submenu to choose the spoken and translated language. The default is English.
+
+Two switches in the same menu control what happens to a selection.
+
+| Switch | On | Off |
+|--------|----|-----|
+| Translate | text is translated into the target language | the recognised text is captured as it is, so the tool works as a plain screen OCR |
+| Read Aloud | the result is spoken | the result is only shown and copied |
+
+With Translate off the panel header reads `Recognised text, translation off`, and speech follows the language of the captured text rather than the target. All three choices are written to `~/.screenreader.json` and restored on the next launch.
 
 | File | Purpose |
 |------|---------|
-| `~/.screenreader.json` | stores the selected target language index and the Read Aloud preference |
+| `~/.screenreader.json` | stores the target language, the Translate switch, and the Read Aloud switch |
 | `~/Library/Logs/ScreenReader.log` | output of the installed app, useful when something misbehaves |
 
 ## How it works

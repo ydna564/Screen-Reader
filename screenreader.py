@@ -643,15 +643,19 @@ class ScreenReaderApp(rumps.App):
         if not (0 <= self.target_index < len(LANGUAGES)):
             self.target_index = 0
         self.read_aloud = bool(cfg.get("read_aloud", True))
+        self.translating = bool(cfg.get("translating", True))
 
         self.last_text = None
 
         self.enter_item = rumps.MenuItem(
-            "Translate / Cancel  (⇧⌘1)", callback=self.on_enter)
+            "Capture / Cancel  (⇧⌘1)", callback=self.on_enter)
         self.stop_item = rumps.MenuItem(
             "Dismiss / Stop", callback=self.on_stop)
         self.copy_item = rumps.MenuItem(
             "Copy Last Text", callback=self.on_copy_last)
+        self.translate_item = rumps.MenuItem(
+            "Translate", callback=self.on_toggle_translate)
+        self.translate_item.state = 1 if self.translating else 0
         self.read_item = rumps.MenuItem(
             "Read Aloud", callback=self.on_toggle_read)
         self.read_item.state = 1 if self.read_aloud else 0
@@ -669,6 +673,7 @@ class ScreenReaderApp(rumps.App):
             self.stop_item,
             self.copy_item,
             None,
+            self.translate_item,
             self.read_item,
             self.lang_menu,
             None,
@@ -737,13 +742,14 @@ class ScreenReaderApp(rumps.App):
             self.session = None
         self._stop_speech()
 
-    @staticmethod
-    def _panel_header(src_code, translated, target):
+    def _panel_header(self, src_code, translated, target):
         """Label the panel with what actually happened to the text."""
         target_name, target_code = target[0], target[2]
         src_name = LANG_BY_CODE.get(src_code, src_code)
         if translated:
             return "%s to %s" % (src_name, target_name)
+        if not self.translating:
+            return "Recognised text, translation off"
         if not _HAS_ARGOS:
             return "Recognised text, translation not installed"
         if src_code is None:
@@ -779,8 +785,11 @@ class ScreenReaderApp(rumps.App):
                 self.downloading = True
                 notify("Screen Reader", msg)
 
-            spoken, src, did = translate(
-                text, target[2], on_status=_status)
+            if self.translating:
+                spoken, src, did = translate(
+                    text, target[2], on_status=_status)
+            else:
+                spoken, src, did = text, _detect_source(text), False
             self.downloading = False
             self.last_text = spoken
             header = self._panel_header(src, did, target)
@@ -819,7 +828,16 @@ class ScreenReaderApp(rumps.App):
 
     # ---- speech ----
     def _speak(self, text):
-        voice = pick_voice(self.target[3])
+        # With translation off the text keeps its own language, so the voice
+        # has to follow the text rather than the chosen target.
+        voices = self.target[3]
+        if not self.translating:
+            code = _detect_source(text)
+            for _name, _bcp, argos, cand in LANGUAGES:
+                if argos == code:
+                    voices = cand
+                    break
+        voice = pick_voice(voices)
         args = ["say"]
         if voice:
             args += ["-v", voice]
@@ -859,6 +877,11 @@ class ScreenReaderApp(rumps.App):
     def on_stop(self, _):
         AppHelper.callAfter(self.dismiss_all)
 
+    def on_toggle_translate(self, _):
+        self.translating = not self.translating
+        self.translate_item.state = 1 if self.translating else 0
+        self._save_cfg()
+
     def on_toggle_read(self, _):
         self.read_aloud = not self.read_aloud
         self.read_item.state = 1 if self.read_aloud else 0
@@ -879,7 +902,8 @@ class ScreenReaderApp(rumps.App):
             "pinned beside the selection, and read aloud when Read Aloud "
             "is on.\n\n"
             "⇧⌘1  select & translate, press again to cancel or dismiss\n\n"
-            "Translates between Chinese and English only.\n\n"
+            "Translates between Chinese and English only. Turn Translate "
+            "off in the menu to capture the text without translating it.\n\n"
             "Current language: {}\n"
             "Translation: {}".format(
                 self.target[0],
@@ -908,7 +932,8 @@ class ScreenReaderApp(rumps.App):
         try:
             with open(CONFIG_PATH, "w") as f:
                 json.dump({"target_index": self.target_index,
-                           "read_aloud": self.read_aloud}, f)
+                           "read_aloud": self.read_aloud,
+                           "translating": self.translating}, f)
         except Exception:
             pass
 
