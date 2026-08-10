@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="452" viewBox="0 0 720 452" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0b1f2a" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <rect width="720" height="452" rx="14" fill="#eef1f4"/>
+
+  <!-- menu bar strip -->
+  <rect x="20" y="20" width="680" height="34" rx="8" fill="#1E4A5F"/>
+  <text x="40" y="42" fill="#ffffff" font-size="13" opacity="0.55">menu bar</text>
+
+  <!-- the book status icon, highlighted as the open one -->
+  <rect x="470" y="23" width="34" height="28" rx="6" fill="#ffffff" opacity="0.22"/>
+  <g transform="translate(479,29)" stroke="#ffffff" stroke-width="1.7" fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M8 2.5 L1.5 3.6 L1.5 13 L8 12 Z"/>
+    <path d="M8 2.5 L14.5 3.6 L14.5 13 L8 12 Z"/>
+  </g>
+  <text x="530" y="42" fill="#ffffff" font-size="12" opacity="0.75">← click the book icon</text>
+
+  <!-- dropdown panel -->
+  <g filter="url(#shadow)">
+    <rect x="360" y="62" width="300" height="352" rx="12" fill="#fbfbfc" stroke="#d3d8de"/>
+  </g>
+
+  <!-- actions -->
+  <text x="384" y="96" font-size="14" fill="#1d2530">Capture / Cancel</text>
+  <text x="636" y="96" font-size="13" fill="#8a94a2" text-anchor="end">⇧⌘1</text>
+
+  <text x="384" y="126" font-size="14" fill="#1d2530">Dismiss / Stop</text>
+  <text x="384" y="156" font-size="14" fill="#1d2530">Copy Last Text</text>
+
+  <line x1="372" y1="174" x2="648" y2="174" stroke="#e3e7ec"/>
+
+  <!-- the two switches, both ticked -->
+  <text x="368" y="204" font-size="14" fill="#1E4A5F">✓</text>
+  <text x="392" y="204" font-size="14" fill="#1d2530" font-weight="600">Translate</text>
+  <text x="636" y="204" font-size="11.5" fill="#8a94a2" text-anchor="end">off = capture only</text>
+
+  <text x="368" y="234" font-size="14" fill="#1E4A5F">✓</text>
+  <text x="392" y="234" font-size="14" fill="#1d2530" font-weight="600">Read Aloud</text>
+  <text x="636" y="234" font-size="11.5" fill="#8a94a2" text-anchor="end">off = silent</text>
+
+  <!-- language submenu -->
+  <text x="392" y="264" font-size="14" fill="#1d2530">Language</text>
+  <text x="638" y="264" font-size="13" fill="#8a94a2" text-anchor="end">▸</text>
+
+  <line x1="372" y1="282" x2="648" y2="282" stroke="#e3e7ec"/>
+  <text x="392" y="312" font-size="14" fill="#1d2530">About</text>
+  <text x="392" y="342" font-size="14" fill="#1d2530">Quit</text>
+
+  <!-- submenu flyout -->
+  <g filter="url(#shadow)">
+    <rect x="150" y="238" width="196" height="76" rx="10" fill="#fbfbfc" stroke="#d3d8de"/>
+  </g>
+  <text x="158" y="268" font-size="14" fill="#1E4A5F">✓</text>
+  <text x="182" y="268" font-size="14" fill="#1d2530">English</text>
+  <text x="182" y="298" font-size="14" fill="#1d2530">Chinese (Mandarin)</text>
+
+  <!-- caption -->
+  <text x="24" y="392" font-size="12.5" fill="#5b6673">Translate and Read Aloud are</text>
+  <text x="24" y="412" font-size="12.5" fill="#5b6673">independent switches, so a selection</text>
+  <text x="24" y="432" font-size="12.5" fill="#5b6673">can be captured only, translated, or read.</text>
+</svg>

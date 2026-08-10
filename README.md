@@ -100,6 +100,8 @@ Trigger a selection with the hotkey, drag a box over the text you want, and let 
 | `⇧⌘1` again | Cancel the selection, dismiss the pinned overlay, or stop speech |
 | `Esc` while selecting | Abort the current selection |
 
+![The highlighted region, the pinned panel, and the cancel button](docs/overlay.svg)
+
 You can also trigger, dismiss, and choose the language from the book icon in the menu bar. The same icon shows the current state with a small symbol beside it.
 
 | Symbol | State |
@@ -114,6 +116,8 @@ You can also trigger, dismiss, and choose the language from the book icon in the
 ## Configuration
 
 Click the menu-bar icon and open the Language submenu to choose the spoken and translated language. The default is English.
+
+![The menu bar dropdown with the Translate and Read Aloud switches and the Language submenu](docs/menu.svg)
 
 Two switches in the same menu control what happens to a selection.
 
@@ -132,6 +136,8 @@ With Translate off the panel header reads `Recognised text, translation off`, an
 ## How it works
 
 The whole tool is one Python file backed by PyObjC bindings to the native macOS frameworks. A single run does the following.
+
+![The pipeline from hotkey to pinned panel, with the Translate and Read Aloud switches](docs/pipeline.svg)
 
 1. A global hotkey listener from `pynput` catches `⇧⌘1` and toggles the selection state on the main thread.
 2. A borderless overlay window dims every screen and lets you rubber-band a rectangle. The overlay is marked as non-capturable, so it never appears in the screenshot itself.

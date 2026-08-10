@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="330" viewBox="0 0 880 330" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#7d8894"/>
+    </marker>
+  </defs>
+
+  <rect width="880" height="330" rx="14" fill="#eef1f4"/>
+  <text x="28" y="40" font-size="13" fill="#5b6673" letter-spacing="0.6">ONE SELECTION, START TO FINISH, ALL ON THIS MACHINE</text>
+
+  <!-- stage boxes -->
+  <g>
+    <rect x="28" y="62" width="150" height="72" rx="10" fill="#1E4A5F"/>
+    <text x="103" y="92" font-size="14" fill="#ffffff" text-anchor="middle" font-weight="600">⇧⌘1</text>
+    <text x="103" y="114" font-size="11.5" fill="#ffffff" text-anchor="middle" opacity="0.75">global hotkey</text>
+  </g>
+  <line x1="182" y1="98" x2="212" y2="98" stroke="#7d8894" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <g>
+    <rect x="218" y="62" width="160" height="72" rx="10" fill="#ffffff" stroke="#cfd6dd"/>
+    <text x="298" y="92" font-size="13.5" fill="#1d2530" text-anchor="middle" font-weight="600">Drag a region</text>
+    <text x="298" y="114" font-size="11.5" fill="#6b7683" text-anchor="middle">dimmed overlay</text>
+  </g>
+  <line x1="382" y1="98" x2="412" y2="98" stroke="#7d8894" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <g>
+    <rect x="418" y="62" width="160" height="72" rx="10" fill="#ffffff" stroke="#cfd6dd"/>
+    <text x="498" y="92" font-size="13.5" fill="#1d2530" text-anchor="middle" font-weight="600">Capture</text>
+    <text x="498" y="114" font-size="11.5" fill="#6b7683" text-anchor="middle">screencapture, temp PNG</text>
+  </g>
+  <line x1="582" y1="98" x2="612" y2="98" stroke="#7d8894" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <g>
+    <rect x="618" y="62" width="234" height="72" rx="10" fill="#ffffff" stroke="#cfd6dd"/>
+    <text x="735" y="92" font-size="13.5" fill="#1d2530" text-anchor="middle" font-weight="600">Apple Vision OCR</text>
+    <text x="735" y="114" font-size="11.5" fill="#6b7683" text-anchor="middle">zh-Hans first, then en-US</text>
+  </g>
+
+  <!-- elbow down from OCR to the switch row -->
+  <path d="M735 138 L735 166 L170 166 L170 190" fill="none" stroke="#7d8894" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <!-- Translate switch -->
+  <g>
+    <rect x="60" y="196" width="220" height="86" rx="10" fill="#ffffff" stroke="#cfd6dd"/>
+    <text x="170" y="222" font-size="13.5" fill="#1d2530" text-anchor="middle" font-weight="600">Translate switch</text>
+    <text x="170" y="244" font-size="11.5" fill="#1E4A5F" text-anchor="middle">on → Argos, offline</text>
+    <text x="170" y="264" font-size="11.5" fill="#6b7683" text-anchor="middle">off → text kept as captured</text>
+  </g>
+  <line x1="284" y1="239" x2="322" y2="239" stroke="#7d8894" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <!-- panel -->
+  <g>
+    <rect x="328" y="196" width="220" height="86" rx="10" fill="#1E4A5F"/>
+    <text x="438" y="222" font-size="13.5" fill="#ffffff" text-anchor="middle" font-weight="600">Pinned panel</text>
+    <text x="438" y="244" font-size="11.5" fill="#ffffff" text-anchor="middle" opacity="0.8">beside your selection</text>
+    <text x="438" y="264" font-size="11.5" fill="#ffffff" text-anchor="middle" opacity="0.8">Copy and Cancel buttons</text>
+  </g>
+  <line x1="552" y1="239" x2="590" y2="239" stroke="#7d8894" stroke-width="1.6" marker-end="url(#arrow)"/>
+
+  <!-- read aloud -->
+  <g>
+    <rect x="596" y="196" width="256" height="86" rx="10" fill="#ffffff" stroke="#cfd6dd"/>
+    <text x="724" y="222" font-size="13.5" fill="#1d2530" text-anchor="middle" font-weight="600">Read Aloud switch</text>
+    <text x="724" y="244" font-size="11.5" fill="#1E4A5F" text-anchor="middle">on → spoken with say</text>
+    <text x="724" y="264" font-size="11.5" fill="#6b7683" text-anchor="middle">off → shown and copied only</text>
+  </g>
+
+  <text x="28" y="312" font-size="11.5" fill="#8a94a2">The temporary PNG is deleted right after recognition, and nothing leaves the machine at any stage.</text>
+</svg>
