@@ -56,8 +56,15 @@ PLIST_EOF
 cat > "$APP/Contents/MacOS/ScreenReader" <<LAUNCH_EOF
 #!/bin/bash
 mkdir -p "\$HOME/Library/Logs"
-exec "$PROJ/.venv/bin/python" "$PROJ/screenreader.py" \\
-     >> "\$HOME/Library/Logs/ScreenReader.log" 2>&1
+LOG="\$HOME/Library/Logs/ScreenReader.log"
+
+# On Apple Silicon, LaunchServices starts this universal Python under Rosetta,
+# and the x86_64 slice cannot load the arm64 ctranslate2 that Argos Translate
+# needs, which silently disables translation. Pin the native architecture.
+if [ "\$(sysctl -n hw.optional.arm64 2>/dev/null)" = "1" ]; then
+    exec /usr/bin/arch -arm64 "$PROJ/.venv/bin/python" "$PROJ/screenreader.py" >> "\$LOG" 2>&1
+fi
+exec "$PROJ/.venv/bin/python" "$PROJ/screenreader.py" >> "\$LOG" 2>&1
 LAUNCH_EOF
 chmod +x "$APP/Contents/MacOS/ScreenReader"
 
